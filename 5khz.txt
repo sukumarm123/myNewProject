@@ -1,0 +1,52 @@
+.To generate a 100% duty cycle with a 50 Hz frequency output using an ATmega16 microcontroller
+
+## Calculation
+ The ATmega16 operates with an external clock (let's assume 16 MHz for this example).
+ 
+ fpwm = fclk / (N.(TOP + 1))
+ 
+ Where, 
+ fpwm is needed value in hz
+ fclk is the clock frequency (16 MHz).
+ N is the prescaler value.
+ TOP is the value in the ICR1 register.
+ 
+**If we choose a prescaler of 256
+ then, 
+	ICR1 = 1249
+	
+##  Code 
+#include <avr/io.h>
+
+void timer1_init()
+{
+    // Set Fast PWM mode using ICR1 as TOP
+    TCCR1A = (1 << WGM11);
+    TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS12); // Prescaler 256
+
+    // Set the TOP value for 50Hz
+    ICR1 = 1249;
+
+    // Set OCR1A for 100% duty cycle
+    OCR1A = 1249;
+
+    // Configure OC1A pin as output
+    DDRD |= (1 << PD5);
+
+    // Enable output on OC1A pin
+    TCCR1A |= (1 << COM1A1) | (1 << COM1A0); // Set OC1A on Compare Match
+}
+
+int main(void)
+{
+    // Initialize Timer1
+    timer1_init();
+
+    // Main loop
+    while (1)
+    {
+        // Do nothing, Timer1 is running in the background
+    }
+}
+
+
